@@ -23,10 +23,10 @@ pub fn copy_dir<P1: AsRef<Path> + Copy, P2: AsRef<Path> + Copy>(
     fs::create_dir_all(dest).map_err(|e| format!("{:?}:{:?}", dest.as_ref().display(), e))?;
     walk_dir(src, &mut |p: &PathBuf| {
         let dest_p = dest.as_ref().join(p.strip_prefix(src).unwrap());
+        println!("cargo:rerun-if-changed={}", p.display());
         if p.is_dir() {
             fs::create_dir_all(&dest_p).map_err(|e| format!("{:?}:{:?}", dest_p.display(), e))?;
         } else {
-            println!("cargo:rerun-if-changed={}", p.display());
             fs::copy(&p, &dest_p)
                 .map_err(|e| format!("Copy {:?} to {:?}:{:?}", p.display(), dest_p.display(), e))?;
         }
@@ -41,11 +41,11 @@ pub fn link_dir<P1: AsRef<Path> + Copy, P2: AsRef<Path> + Copy>(
     fs::create_dir_all(dest).map_err(|e| format!("{:?}:{:?}", dest.as_ref().display(), e))?;
     walk_dir(src, &mut |p: &PathBuf| {
         let dest_p = dest.as_ref().join(p.strip_prefix(&src).unwrap());
+        println!("cargo:rerun-if-changed={}", p.display());
         if p.is_dir() {
             fs::create_dir_all(&dest_p).map_err(|e| format!("{:?}:{:?}", dest_p.display(), e))?;
         } else {
             use std::os::unix::fs::symlink;
-            println!("cargo:rerun-if-changed={}", p.display());
             if dest_p.exists() {
                 fs::remove_file(&dest_p).map_err(|e| {
                     format!("Link {:?} to {:?}:{:?}", p.display(), dest_p.display(), e)

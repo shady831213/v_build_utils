@@ -66,7 +66,7 @@ pub fn dep_value(dep: &str, key: &str) -> Result<String, String> {
 
 pub struct OtherDir {
     key: String,
-    root: PathBuf,
+    pub root: PathBuf,
 }
 
 impl OtherDir {

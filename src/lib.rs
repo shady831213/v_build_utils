@@ -70,10 +70,14 @@ pub struct OtherDir {
 }
 
 impl OtherDir {
-    pub fn new(key: &str) -> Result<Self, env::VarError> {
-        let out_dir = PathBuf::from(env::var("OUT_DIR")?);
-        let header_root = out_dir.join(env::var("CARGO_MANIFEST_LINKS")?);
+    pub fn new(key: &str) -> Result<Self, String> {
+        let out_dir = PathBuf::from(env::var("OUT_DIR").map_err(|e| e.to_string())?);
+        let header_root = out_dir
+            .join(env::var("CARGO_MANIFEST_LINKS").map_err(|e| e.to_string())?)
+            .join(key);
         println!("cargo:{}={}", key, header_root.display());
+        fs::create_dir_all(&header_root)
+            .map_err(|e| format!("{:?}:{:?}", header_root.display(), e))?;
         Ok(OtherDir {
             key: key.to_string(),
             root: header_root,
